@@ -1,21 +1,24 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  annotations:
-    policy.open-cluster-management.io/categories: ''
-    policy.open-cluster-management.io/controls: ''
-    policy.open-cluster-management.io/standards: ''
-  name: configmap-policy
+  name: configmap-policy-git
   namespace: np-demo-ns
+  annotations:
+    policy.open-cluster-management.io/standards: null
+    policy.open-cluster-management.io/categories: null
+    policy.open-cluster-management.io/controls: null
 spec:
+  remediationAction: inform
   disabled: false
   policy-templates:
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: configmap-policy-prod-ns
+          name: configmap-policy-git-prod-ns
         spec:
+          remediationAction: inform
+          severity: low
           namespaceSelector:
             exclude:
               - kube-*
@@ -31,29 +34,26 @@ spec:
                   key2: value2
                 kind: ConfigMap
                 metadata:
-                  name: my-zzz-config
-          remediationAction: inform
-          severity: low
-  remediationAction: inform
+                  name: my-gitops-config
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: binding-configmap-policy
+  name: binding-configmap-policy-git
   namespace: np-demo-ns
 placementRef:
-  apiGroup: apps.open-cluster-management.io
+  name: placement-configmap-policy-git
   kind: PlacementRule
-  name: placement-configmap-policy
+  apiGroup: apps.open-cluster-management.io
 subjects:
-  - apiGroup: policy.open-cluster-management.io
+  - name: configmap-policy-git
     kind: Policy
-    name: configmap-policy
+    apiGroup: policy.open-cluster-management.io
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: placement-configmap-policy
+  name: placement-configmap-policy-git
   namespace: np-demo-ns
 spec:
   clusterConditions:
