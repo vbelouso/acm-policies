@@ -2,7 +2,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: configmap-policy-git
-  namespace: np-demo-ns
+  namespace: policies
   annotations:
     policy.open-cluster-management.io/standards: null
     policy.open-cluster-management.io/categories: null
@@ -40,7 +40,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-configmap-policy-git
-  namespace: np-demo-ns
+  namespace: policies
 placementRef:
   name: placement-configmap-policy-git
   kind: PlacementRule
@@ -54,7 +54,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: placement-configmap-policy-git
-  namespace: np-demo-ns
+  namespace: policies
 spec:
   clusterConditions:
     - status: 'True'
