@@ -26,7 +26,7 @@ spec:
             include:
               - '*'
           object-templates:
-            - complianceType: musthave
+            - complianceType: mustnothave
               objectDefinition:
                 apiVersion: v1
                 data:
