@@ -1,0 +1,67 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: ''
+    policy.open-cluster-management.io/controls: ''
+    policy.open-cluster-management.io/standards: ''
+  name: configmap-policy
+  namespace: np-demo-ns
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: configmap-policy-prod-ns
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+              - openshift-*
+            include:
+              - '*'
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  key1: value1
+                  key2: value2
+                kind: ConfigMap
+                metadata:
+                  name: my-zzz-config
+          remediationAction: inform
+          severity: low
+  remediationAction: inform
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-configmap-policy
+  namespace: np-demo-ns
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-configmap-policy
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: configmap-policy
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-configmap-policy
+  namespace: np-demo-ns
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: class
+        operator: In
+        values:
+          - learning
