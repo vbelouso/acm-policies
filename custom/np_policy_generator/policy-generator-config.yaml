@@ -10,7 +10,7 @@ policyDefaults:
   severity: medium
 policies:
   - name: gatekeeper-require-ns-labels
-    disabled: true
+    disabled: false
     manifests:
       - path: input/gatekeeper.yaml
     namespaceSelector:
