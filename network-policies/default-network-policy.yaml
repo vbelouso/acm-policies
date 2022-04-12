@@ -24,7 +24,7 @@ spec:
               - kube-*
               - openshift-*
             include:
-              - '*'
+              - "*"
           object-templates:
             - complianceType: musthave
               objectDefinition:
@@ -59,7 +59,7 @@ metadata:
   namespace: policies
 spec:
   clusterConditions:
-    - status: 'True'
+    - status: "True"
       type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
@@ -67,3 +67,7 @@ spec:
         operator: In
         values:
           - learning
+      - key: region
+        operator: In
+        values:
+          - eastus
