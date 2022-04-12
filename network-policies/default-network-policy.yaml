@@ -1,0 +1,69 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: default-network-policy
+  namespace: policies
+  annotations:
+    policy.open-cluster-management.io/standards: null
+    policy.open-cluster-management.io/categories: null
+    policy.open-cluster-management.io/controls: null
+spec:
+  remediationAction: inform
+  disabled: true
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: default-network-policy-prod-ns
+        spec:
+          remediationAction: inform
+          severity: low
+          namespaceSelector:
+            exclude:
+              - kube-*
+              - openshift-*
+            include:
+              - '*'
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: NetworkPolicy
+                apiVersion: networking.k8s.io/v1
+                metadata:
+                  name: allow-same-namespace
+                spec:
+                  podSelector: {}
+                  ingress:
+                    - from:
+                        - podSelector: {}
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-default-network-policy
+  namespace: policies
+placementRef:
+  name: placement-default-network-policy
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: default-network-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-default-network-policy
+  namespace: policies
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: class
+        operator: In
+        values:
+          - learning
