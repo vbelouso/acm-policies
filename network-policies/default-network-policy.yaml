@@ -1,7 +1,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: default-network-policy
+  name: default-network-policy-helm
   namespace: policies
   annotations:
     policy.open-cluster-management.io/standards: null
@@ -15,7 +15,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: default-network-policy-prod-ns
+          name: default-network-policy-helm-prod-ns
         spec:
           remediationAction: inform
           severity: low
@@ -41,21 +41,21 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: binding-default-network-policy
+  name: binding-default-network-policy-helm
   namespace: policies
 placementRef:
-  name: placement-default-network-policy
+  name: placement-default-network-policy-helm
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: default-network-policy
+  - name: default-network-policy-helm
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: placement-default-network-policy
+  name: placement-default-network-policy-helm
   namespace: policies
 spec:
   clusterConditions:

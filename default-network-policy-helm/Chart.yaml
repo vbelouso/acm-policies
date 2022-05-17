@@ -1,0 +1,9 @@
+apiVersion: v2
+name: default-network-policy-helm
+description: Network policies managed by ACM Governance.
+type: application
+version: 0.1.0
+keywords:
+  - Policy
+  - Security
+  - Governance
