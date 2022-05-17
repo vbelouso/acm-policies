@@ -1,0 +1,41 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: {{template "commonlib.name" .}}
+  labels: {{include "commonlib.labels" . | nindent 4}}
+spec:
+  remediationAction: {{.Values.remediationAction}}
+  disabled: {{.Values.disable}}
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: {{.Values.configurationPolicyName}}
+        spec:
+          remediationAction: {{.Values.remediationAction}}
+          severity: {{.Values.severity}}
+          namespaceSelector:
+            exclude: {{toYaml .Values.namespaceSelector.exclude | nindent 12}}
+            include: {{toYaml .Values.namespaceSelector.include | nindent 12}}
+          object-templates:
+            - complianceType: {{.Values.complianceType}}
+              objectDefinition:
+                kind: NetworkPolicy
+                apiVersion: networking.k8s.io/v1
+                metadata:
+                  name: allow-same-namespace
+                spec:
+                  podSelector: {}
+                  ingress:
+                    - from:
+                        - podSelector: {}
+            - complianceType: {{.Values.complianceType}}
+              objectDefinition:
+                kind: NetworkPolicy
+                apiVersion: networking.k8s.io/v1
+                metadata:
+                  name: deny-all
+                spec:
+                  podSelector: {}
+                  ingress: []
