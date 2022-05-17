@@ -1,0 +1,27 @@
+# -- Configuration policy resource name.
+configurationPolicyName: default-network-policy-cfg
+
+# -- Define the severity when the policy is non-compliant.
+# The parameter values are low, medium or high.
+severity: high
+
+# -- The remediation of the policy. The parameter values are enforce or inform.
+remediationAction: inform
+
+# -- Enable or disable policy.
+disable: false
+
+# -- Expected behavior that be evaluated or applied to the managed clusters.
+# The parameter values are mustonlyhave, musthave, mustnothave.
+complianceType: musthave
+
+# Namespace(s) to which apply the policy.
+namespaceSelector:
+  # -- Explicitly specified namespace(s) to which the policy will not apply.
+  exclude:
+    - kube-*
+    - openshift*
+    - open-cluster-management*
+  # -- Explicitly specified namespace(s) to which the policy will apply.
+  include:
+    - "*"

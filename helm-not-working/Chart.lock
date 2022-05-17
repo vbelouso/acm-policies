@@ -1,0 +1,6 @@
+dependencies:
+- name: commonlib
+  repository: https://finastra-engineering.github.io/fusion-operate-charts
+  version: 0.2.3
+digest: sha256:09f3855a494de1569f2f4cba41952241fb27d298b9558f24b69f6300b4576a72
+generated: "2022-05-16T14:52:27.383981292Z"

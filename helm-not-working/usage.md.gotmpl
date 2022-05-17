@@ -1,0 +1,22 @@
+## Description
+
+This chart deploys default network policies for OpenShift clusters using ACM Governance.
+
+There are two network policies applied to the managed cluster:
+
+1. `deny-all` blocking network traffic between namespaces.
+2. `allow-same-namespace` allowing all network traffic inside namespace.
+
+By default network policies not applied to `kube-*`, `openshift*`, `open-cluster-management*` namespaces.
+
+The default policy action is to `enforce` to detect existing misconfigurations and fix it.
+
+The correctness of the policy can be checked in the `Governance` menu of the ACM console.
+
+## Usage
+
+In general, this Helm chart doesn't require any extra settings:
+
+```shell
+helm upgrade --install --create-namespace --namespace container-platform network-policies finastra-engineering/network-policies
+```

@@ -1,0 +1,117 @@
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/cluster-admin: "true"
+    apps.open-cluster-management.io/hosting-deployable: >-
+      container-platform/channel-Subscription-default-network-policy-internal-learning-eastus
+    apps.open-cluster-management.io/hosting-subscription: container-platform/container-platform-local
+    apps.open-cluster-management.io/reconcile-option: merge
+    apps.open-cluster-management.io/reconcile-rate: high
+    apps.open-cluster-management.io/sync-source: subgbk8s-container-platform/container-platform-local
+    open-cluster-management.io/user-group: c3lzdGVtadfasdasdasdasbTphdXRoZW50aWNhdGVk
+    open-cluster-management.io/user-identity: a3VasdfasdasgsdffgdZG1pbg==
+  creationTimestamp: "2022-05-15T08:25:48Z"
+  generation: 2982
+  labels:
+    acm-app: default-network-policy
+    app.kubernetes.io/part-of: default-network-policy
+    tenant: container-platform
+  name: default-network-policy-internal-learning-eastus
+  namespace: container-platform
+  ownerReferences:
+    - apiVersion: apps.open-cluster-management.io/v1
+      kind: Subscription
+      name: container-platform-local
+      uid: 2f85cf1a-1283-4e9a-a165-494e3ef15fd4
+  resourceVersion: "634174355"
+  uid: ea385e7f-bd66-44e6-8958-5c4a73d7a8c6
+spec:
+  channel: container-platform-ch-helm/channel
+  name: default-network-policy
+  packageFilter:
+    version: 0.1.0
+  packageOverrides:
+    - packageAlias: default-network-policy
+      packageName: default-network-policy
+  placement:
+    placementRef:
+      name: internal-learning-eastus
+  secondaryChannel: ""
+status:
+  lastUpdateTime: "2022-05-15T09:51:06Z"
+  message: pintc010041040201050a001:Active
+  phase: Propagated
+  statuses:
+    pintc010041040201050a001:
+      packages:
+        ? default-network-policy-internal-learning-eastus-fa25f-default-network-policy
+        : lastUpdateTime: "2022-05-15T08:34:12Z"
+          phase: Subscribed
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  annotations:
+    apps.open-cluster-management.io/cluster-admin: "true"
+    apps.open-cluster-management.io/hosting-deployable: container-platform-ch-helm/channel-Channel-channel
+    apps.open-cluster-management.io/hosting-subscription: products/products-local
+    apps.open-cluster-management.io/reconcile-option: merge
+    apps.open-cluster-management.io/reconcile-rate: high
+    apps.open-cluster-management.io/sync-source: subgbk8s-products/products-local
+  creationTimestamp: "2021-12-22T12:46:23Z"
+  generation: 1
+  labels:
+    acm-app: container-platform-gitops
+    app.kubernetes.io/instance: container-platform
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: container-platform
+    app.kubernetes.io/part-of: products-gitops
+  name: channel
+  namespace: container-platform-ch-helm
+  resourceVersion: "173383008"
+  uid: d67609ea-8c94-499e-9d1d-25530df9a9e9
+spec:
+  pathname: https://finastra-engineering.github.io/fusion-operate-charts/
+  type: HelmRepo
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  annotations:
+    apps.open-cluster-management.io/deployables: ""
+    apps.open-cluster-management.io/reconcile-option: merge
+  labels:
+    acm-app: default-network-policy
+    app.kubernetes.io/part-of: container-platform-gitops
+    tenant: container-platform
+  name: default-network-policy
+  namespace: container-platform
+  ownerReferences:
+    - apiVersion: apps.open-cluster-management.io/v1
+      kind: Subscription
+      name: container-platform-local
+spec:
+  descriptor: {}
+  selector:
+    matchLabels:
+      acm-app: default-network-policy
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  labels:
+    app.kubernetes.io/part-of: container-platform-gitops
+  name: internal-learning-eastus
+  namespace: container-platform
+  ownerReferences:
+    - apiVersion: apps.open-cluster-management.io/v1
+      kind: Subscription
+      name: container-platform-local
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: OpenShift
+      zone: internal-learning-eastus

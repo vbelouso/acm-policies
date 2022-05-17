@@ -1,0 +1,197 @@
+# -- Configure Grafana Dashboards for the chart here.
+# Additional dashboards can be added by adding a dictionary key similar to the 'bundled-dashboards' object.
+# @default -- See below
+grafanaDashboards:
+  bundled-dashboards:
+    # -- Enables or disables dashboards deployment. Default: true
+    enabled: true
+    # -- Annotations to add to a dashboard configmap
+    annotations: {}
+    # -- Labels to add to the dashboard configmap
+    labels:
+      grafana_dashboard: "1"
+    # -- Glob to search for dashboards
+    filesGlob: dashboards/*.json
+    # -- Inline dashboards
+    data: {}
+
+# -- Configure Prometheus Probes for the chart here.
+# Additional probe resources can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+probes:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to a probe resource
+    annotations: {}
+    # -- Labels to add to the probe resource
+    labels: {}
+    # -- Probe resource spec as defined [here](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/crds/crd-probes.yaml)
+    # @default -- See `values.yaml` file for example
+    spec:
+      prober:
+        url: prometheus-blackbox-exporter.svc:9115
+      module: http_2xx
+      targets:
+        ingress:
+          namespaceSelector:
+            any: true
+          relabelingConfigs:
+            - sourceLabels:
+                - __meta_kubernetes_ingress_annotation_kubernetes_io_ingress_class
+              action: keep
+              regex: .+public$
+            - sourceLabels: [__meta_kubernetes_ingress_path]
+              action: drop
+              regex: /oauth2$
+            - sourceLabels: [__meta_kubernetes_namespace]
+              action: drop
+              regex: .+-tmp[a-zA-Z0-9-]+$
+            - sourceLabels:
+                - __meta_kubernetes_ingress_scheme
+                - __meta_kubernetes_ingress_host
+                - __meta_kubernetes_ingress_path
+              regex: (.+);(.+);(.+)
+              replacement: ${1}://${2}${3}
+              targetLabel: __param_target
+            - sourceLabels: [__param_target]
+              targetLabel: instance
+            - action: labelmap
+              regex: __meta_kubernetes_ingress_label_(.+)
+            - action: labeldrop
+              regex: (app_kubernetes_io_|chart|heritage).*
+
+# -- Configure Prometheus Rules for the chart here.
+# Additional prometheus rules can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+prometheusRules:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to a Prometheus rule
+    annotations: {}
+    # -- Labels to add to the Prometheus rule
+    labels: {}
+    # -- Content of Prometheus rule file
+    # @default -- See `values.yaml` file for example
+    groups:
+      - name: general.rules
+        rules:
+          - alert: TargetDown
+            annotations:
+              message: "{{`{{ $value }}`}}% of the {{`{{ $labels.job }}`}} targets are down."
+            expr: 100 * (count(up == 0) BY (job) / count(up) BY (job)) > 10
+            for: 10m
+            labels:
+              severity: warning
+
+# -- Configure [ClusterSecretStore](https://external-secrets.io/v0.5.1/api-clustersecretstore/) resources for the chart here.
+# Additional ClusterSecretStore resources can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+clusterSecretStores:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to the clusterSecretStore resource
+    annotations: {}
+    # -- Labels to add to the clusterSecretStore resource
+    labels: {}
+    # -- ClusterSecretStore resource spec as defined [here](https://external-secrets.io/latest/api-clustersecretstore/)
+    # @default -- See `values.yaml` file for example
+    spec:
+      provider:
+        azurekv:
+          tenantId: "e17e2402-2a40-42ce-ad75-5848b8d4f6b6"
+          vaultUrl: https://pintc010040040201050b001.vault.azure.net/
+          authSecretRef:
+            clientId:
+              name: kubernetes-external-secrets
+              key: clientId
+              namespace: container-platform
+            clientSecret:
+              name: kubernetes-external-secrets
+              key: clientSecret
+              namespace: container-platform
+
+# -- Configure [SecretStore](https://external-secrets.io/v0.5.1/api-secretstore/) resources for the chart here.
+# Additional SecretStore resources can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+secretStores:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to a dashboard configmap
+    annotations: {}
+    # -- Labels to add to the dashboard configmap
+    labels: {}
+    # -- SecretStore resource spec as defined [here](https://external-secrets.io/latest/api-secretstore/)
+    # @default -- See `values.yaml` file for example
+    spec:
+      provider:
+        azurekv:
+          tenantId: "e17e2402-2a40-42ce-ad75-5848b8d4f6b6"
+          vaultUrl: https://pintc010040040201050b001.vault.azure.net/
+          authSecretRef:
+            clientId:
+              name: kubernetes-external-secrets
+              key: clientId
+            clientSecret:
+              name: kubernetes-external-secrets
+              key: clientSecret
+
+# -- Configure [ClusterExternalSecret](https://external-secrets.io/v0.5.1/api-clusterexternalsecret/) resources for the chart here.
+# Additional ClusterExternalSecret resources can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+clusterExternalSecrets:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to a dashboard configmap
+    annotations: {}
+    # -- Labels to add to the dashboard configmap
+    labels: {}
+    # -- ExternalSecrets resource spec
+    # @default -- See `values.yaml` file for example
+    spec:
+      externalSecretName: "hello-world-es"
+      namespaceSelector:
+        matchLabels:
+          cool: label
+      refreshInterval: 1h
+      externalSecretSpec:
+        secretStoreRef:
+          kind: SecretStore
+          name: default
+        target:
+          name: example
+          creationPolicy: Owner
+        data:
+          - secretKey: someSecret
+            remoteRef:
+              key: someSecret
+
+# -- Configure [ExternalSecret](https://external-secrets.io/v0.5.1/api-externalsecret/) resources for the chart here.
+# Additional ExternalSecret resources can be added by adding a dictionary key similar to the 'example' object.
+# @default -- See below
+externalSecrets:
+  example:
+    # -- Enables or disables rule deployment. Default: true
+    enabled: false
+    # -- Annotations to add to a dashboard configmap
+    annotations: {}
+    # -- Labels to add to the dashboard configmap
+    labels: {}
+    # -- ExternalSecrets resource spec
+    # @default -- See `values.yaml` file for example
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: SecretStore
+        name: default
+      target:
+        name: example
+        creationPolicy: Owner
+      data:
+        - secretKey: someSecret
+          remoteRef:
+            key: someSecret

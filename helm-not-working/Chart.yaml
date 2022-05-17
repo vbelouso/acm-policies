@@ -1,0 +1,13 @@
+apiVersion: v2
+dependencies:
+- name: commonlib
+  repository: https://finastra-engineering.github.io/fusion-operate-charts
+  version: 0.2.3
+description: Network policies managed by ACM Governance.
+keywords:
+- Policy
+- Security
+- Governance
+name: default-network-policy
+type: application
+version: 0.2.0

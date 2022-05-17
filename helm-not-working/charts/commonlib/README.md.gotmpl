@@ -1,0 +1,367 @@
+{{/*
+Set define functions used in template
+*/}}
+
+{{- define "custom.repository.organization" -}}
+finastra-engineering
+{{- end -}}
+
+{{- define "custom.repository.url" -}}
+https://github.com/finastra-engineering/fusion-operate-charts
+{{- end -}}
+
+{{- define "custom.helm.url" -}}
+https://finastra-engineering.github.io/fusion-operate-charts/
+{{- end -}}
+
+{{- define "custom.helm.path" -}}
+{{ template "custom.repository.organization" . }}/{{ template "chart.name" . }}
+{{- end -}}
+
+{{- define "custom.dependencies" -}}
+<!-- markdownlint-disable MD034 -->
+{{ template "chart.requirementsSection" . }}
+<!-- markdownlint-enable MD034 -->
+{{- end -}}
+
+{{- define "custom.tldr" -}}
+## TL;DR
+
+```shell
+cd my-awesome-helm-chart
+cat <<EOF >> Chart.yaml
+dependencies:
+  - name: {{ template "chart.name" . }}
+    version: {{ template "chart.version" . }}
+    repository: {{ template "custom.helm.url" . }}
+EOF
+
+cat <<EOF > templates/commonlib.yaml
+{{ `{{ include "commonlib.all" . }}` }}
+EOF
+```
+{{- end -}}
+
+{{- define "custom.commonConfiguration" -}}
+## Common configuration parameters
+
+List of parameters that are commonly supported across all resource and can be
+configured on per resource basis:
+
+* `name` - sets name prefix used to generate resulting resource name.
+If not set, it defaults to `Key` name of the respective configuration item. This
+parameter can be templated. Required: False
+
+  ```yaml
+  externalSecrets:
+    example:
+      name: example
+      ...
+  ```
+
+  or
+
+  ```yaml
+  externalSecrets:
+    example:
+      name: {{`{{ .Release.Name }}`}}
+      ...
+  ```
+
+* `nameOverride` - sets exact name of resulting resource. This parameter can be
+templated. Required: False
+
+  ```yaml
+  externalSecrets:
+    example:
+      nameOverride: example
+      ...
+  ```
+
+  or
+
+  ```yaml
+  externalSecrets:
+    example:
+      nameOverride: {{`{{ .Release.Name }}`}}
+      ...
+  ```
+
+* `annotations` - annotations map added to resulting resource. Required: False
+
+  ```yaml
+  externalSecrets:
+    example:
+      ...
+      annotations:
+        owner.fusionoperate.io/team: container-platform
+      ...
+  ```
+
+* `labels` - labels map added to resulting resource. Required: False
+
+  ```yaml
+  externalSecrets:
+    example:
+      ...
+      labels:
+        owner.fusionoperate.io/team: container-platform
+      ...
+  ```
+
+{{- end -}}
+
+{{- define "custom.resources" -}}
+## Supported resources
+
+### External Secrets Operator
+
+Library provides support for External Secret Operator resource types as defined
+at [here](https://external-secrets.io/latest/api-overview/#resource-model)
+
+### SecretStore
+
+To create a `SecretStore` resource with helm chart you need to add `secretStores`
+map to the `values.yaml` file. See [`values.yaml`](values.yaml) for a full list
+of supported parameters.
+
+#### Example
+
+Following code snippet added to `values.yaml` file will create `example`
+`SecretStore` resource as part of Helm chart deployment
+
+```yaml
+secretStores:
+  example:
+    spec:
+      provider:
+        azurekv:
+          tenantId: "e17e2402-2a40-42ce-ad75-5848b8d4f6b6"
+          vaultUrl: https://pintc010040040201050b001.vault.azure.net/
+          authSecretRef:
+            clientId:
+              name: kubernetes-external-secrets
+              key: clientId
+            clientSecret:
+              name: kubernetes-external-secrets
+              key: clientSecret
+```
+
+### ClusterSecretStore
+
+To create a `ClusterSecretStore` resource with helm chart you need to add
+`clusterSecretStores` map to the `values.yaml` file.See [`values.yaml`](values.yaml)
+for a full list of supported parameters.
+
+#### Example
+
+Following code snippet added to `values.yaml` file will create `example`
+`ClusterSecretStore` resource as part of Helm chart deployment
+
+```yaml
+clusterSecretStores:
+  example:
+    spec:
+      provider:
+        azurekv:
+          tenantId: "e17e2402-2a40-42ce-ad75-5848b8d4f6b6"
+          vaultUrl: https://pintc010040040201050b001.vault.azure.net/
+          authSecretRef:
+            clientId:
+              name: kubernetes-external-secrets
+              key: clientId
+              namespace: container-platform
+            clientSecret:
+              name: kubernetes-external-secrets
+              key: clientSecret
+              namespace: container-platform
+```
+
+### ClusterExternalSecret
+
+To create a `ClusterExternalSecret` resource with helm chart you need to add
+`clusterExternalSecrets` map to the `values.yaml` file. See [`values.yaml`](values.yaml)
+for a full list of supported parameters.
+
+#### Example
+
+Following code snippet added to `values.yaml` file will create `example`
+`ExternalSecret` resource as part of Helm chart deployment
+
+```yaml
+clusterExternalSecrets:
+  example:
+    enabled: false
+    spec:
+      externalSecretName: "example-es"
+      namespaceSelector:
+        matchLabels:
+          cool: label
+      refreshInterval: 1h
+      externalSecretSpec:
+        secretStoreRef:
+          kind: SecretStore
+          name: default
+        target:
+          name: example
+          creationPolicy: Owner
+        data:
+          - secretKey: someSecret
+            remoteRef:
+              key: someSecret
+```
+
+### ExternalSecret
+
+To create a `ExternalSecret` resource with helm chart you need to add
+`externalSecrets` map to the `values.yaml` file. See [`values.yaml`](values.yaml)
+for a full list of supported parameters.
+
+#### Example
+
+Following code snippet added to `values.yaml` file will create `example`
+`ExternalSecret` resource as part of Helm chart deployment
+
+```yaml
+externalSecrets:
+  example:
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: SecretStore
+        name: default
+      target:
+        name: example
+        creationPolicy: Owner
+      data:
+        - secretKey: someSecret
+          remoteRef:
+            key: someSecret
+```
+
+### Grafana Dashboards
+
+Once the library is included in the Helm Chart, built-in functions will
+automatically search for Grafana dashboard files under the `dashboards/` folder
+at the root of the chart's directory. It expects every dashboard to be stored
+in a separate `json` file, for example, `dashboards/ingress-nginx-requests.json`.
+It is also possible to override dashboard location by using the `filesGlob`
+parameter or define 'em inline in the `values.yaml` file with the `data` key.
+
+#### Example - override default folder
+
+```yaml
+grafanaDashboards:
+  bundled-dashboards:
+    labels:
+      grafana_dashboard: "1"
+    filesGlob: templates/grafana/*.json
+```
+
+#### Example - inline dashboard example
+
+```yaml
+grafanaDashboards:
+  inline-dashboard:
+    labels:
+      grafana_dashboard: "1"
+    data:
+      dashboard1.json: |
+        {
+          "annotations": {
+            ...
+```
+
+### Prometheus Probes
+
+Library provides support for Prometheus Probes resource types as defined
+at [here](https://prometheus-operator.dev/docs/operator/design/#probe).
+For a complete set of supported parameters see [values.yaml](values.yaml) file.
+
+#### Example
+
+```yaml
+probes:
+  example:
+    labels:
+      prometheus: container-platform-incluster
+    spec:
+      prober:
+        url: prometheus-blackbox-exporter.svc:9115
+      module: http_2xx
+      targets:
+        ingress:
+          namespaceSelector:
+            any: true
+          relabelingConfigs:
+            - sourceLabels:
+                - __meta_kubernetes_ingress_annotation_kubernetes_io_ingress_class
+              action: keep
+              regex: .+public$
+            - sourceLabels: [__meta_kubernetes_ingress_path]
+              action: drop
+              regex: /oauth2$
+            - sourceLabels: [__meta_kubernetes_namespace]
+              action: drop
+              regex: .+-tmp[a-zA-Z0-9-]+$
+            - sourceLabels:
+                - __meta_kubernetes_ingress_scheme
+                - __meta_kubernetes_ingress_host
+                - __meta_kubernetes_ingress_path
+              regex: (.+);(.+);(.+)
+              replacement: ${1}://${2}${3}
+              targetLabel: __param_target
+            - sourceLabels: [__param_target]
+              targetLabel: instance
+            - action: labelmap
+              regex: __meta_kubernetes_ingress_label_(.+)
+            - action: labeldrop
+              regex: (app_kubernetes_io_|chart|heritage).*
+```
+
+### Prometheus Rules
+
+Library provides support for Prometheus Rules resource types as defined
+at [here](https://prometheus-operator.dev/docs/operator/design/#prometheusrule).
+For a complete set of supported parameters see [values.yaml](values.yaml) file.
+
+#### Example
+
+```yaml
+prometheusRules:
+  example:
+    groups:
+      - name: general.rules
+        rules:
+          - alert: TargetDown
+            annotations:
+              message: "{{`{{ $value }}`}}% of the {{`{{ $labels.job }}`}} targets are down."
+            expr: 100 * (count(up == 0) BY (job) / count(up) BY (job)) > 10
+            for: 10m
+            labels:
+              severity: warning
+```
+{{- end -}}
+
+{{/*
+Render README.md file
+*/}}
+{{ template "chart.header" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "custom.tldr" . }}
+
+{{ template "custom.commonConfiguration" . }}
+
+{{ template "custom.resources" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.valuesSection" . }}
+<!-- markdownlint-disable MD012 -->
+{{ template "chart.maintainersSection" . }}
+
+<!-- markdownlint-enable MD012 -->

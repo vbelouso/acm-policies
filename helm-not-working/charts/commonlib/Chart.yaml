@@ -1,0 +1,6 @@
+apiVersion: v2
+description: 'This is a library Helm chart that provides out-of-the-box support for
+  most commonly used resources across FusionOperate managed Helm charts. '
+name: commonlib
+type: library
+version: 0.2.3
